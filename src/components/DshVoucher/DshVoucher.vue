@@ -204,6 +204,7 @@
 		color: #FFF;
 		border-radius: 10px;
 		overflow: hidden;
+		background-color: coral!important;
 		.dsh-voucher-wrap {
 			width: 700*@rem;
 			height: 180*@rem;

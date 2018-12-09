@@ -2,22 +2,16 @@
 <template lang="html">
 	<box class="app">
 		<div class="app-container">
-			<tab :line-width=2 active-color='#fc378c' custom-bar-width="40px">
-				<tab-item selected @on-item-click="handleTabChange"  class="vux-1px-r">可使用</tab-item>
-				<tab-item @on-item-click="handleTabChange" class="vux-1px-r">已使用</tab-item>
-				<tab-item @on-item-click="handleTabChange" >已失效</tab-item>
-			</tab>
-			<scroller lock-x :height="'-44'" @on-scroll-bottom="onScrollBottom" ref="scrollerBottom" :scroll-bottom-offst="100">
+			<div class="tab-top-voucher">
+				<span class="pull-down-menu" @click="handlePullDown">{{!voucherType ? '券类型' : voucherType}}<x-icon class="dsh-pull-arrow" type="ios-arrow-down" size="15"></x-icon></span>
+				<span class="pull-down-menu" @click="handlePullDown1">{{!voucherType1 ? '适用类型' : voucherType1}}<x-icon class="dsh-pull-arrow" type="ios-arrow-down" size="15"></x-icon></span>
+				<actionsheet v-model="pullDown" :menus="pullDownMenu" theme="android" @on-click-menu="handleMenuClick"></actionsheet>
+				<actionsheet v-model="pullDown1" :menus="pullDownMenu1" theme="android" @on-click-menu="handleMenuClick1"></actionsheet>
+			</div>
+			<scroller lock-x :height="height" @on-scroll-bottom="onScrollBottom" ref="scrollerBottom" :scroll-bottom-offst="100">
 				<div class="box2">
-					<div class="scrm-tabs__content">
-						<div class="tabpanel">
-							<template v-for="item in couponDataList" >
-								<dsh-coupon :coupon-info="item" :key="item.coupId" ></dsh-coupon>
-							</template>
-							
-						</div>
-
-						<dsh-empty v-if="isEmpty" :text="text"></dsh-empty>
+					<div class="tab-content-voucher">
+						<dsh-empty v-if="itemsVoucherFlag" :text="text"></dsh-empty>
 						<div class="tab-one" v-else>
 							<dsh-voucher v-for="item in itemsVoucher" :key="item.coupId" :activityId="item.activityId" :coupId="item.coupId" :tabType="item.status" :price="item.couponValue" :type="item.coupType" :info="item.coupName" :isBtn="true" :subInfo="item.useThreshold" :time="item.coupDate" :bgColor="item.bgColor"></dsh-voucher>
 						</div>
@@ -37,8 +31,6 @@
 		import('@/components/DshVoucher/DshVoucher.vue').then(m => m.default)
 	const DshEmpty = () =>
 		import('@/components/DshEmpty/DshEmpty.vue').then(m => m.default)
-	//shine
-	import DshCoupon from '@/components/Coupon/Coupon.vue'
 	export default {
 		name: '我的券',
 		components: {
@@ -50,14 +42,11 @@
 			Scroller,
 			LoadMore,
 			Actionsheet,
-			DshEmpty,
-			DshCoupon
-			
+			DshEmpty
 		},
 		data() {
 			return {
-				
-				isEmpty: false, //没有数据
+				itemsVoucherFlag: false, //没有数据
 				text: '您还没有券哦~',
 				token: '',
 				// 券类型
@@ -77,12 +66,88 @@
 				height: '',
 				loadMore: true,
 				bottomCount: 0,
-				//shine
-				couponStatus:0,
-				onFetching: false,
-				pageCount:0,
-				couponDataList:[],
-				isEmpty:false,
+			}
+		},
+		methods: {
+			// 菜单点击
+			handlePullDown() {
+				this.pullDown = true;
+			},
+			handlePullDown1() {
+				this.pullDown1 = true;
+			},
+			handleMenuClick(value) {
+				this.itemsVoucher = [];
+				this.voucherType = this.pullDownMenu[value];
+				this.bottomCount = 0;
+				this.loadingMoreData(this.bottomCount);
+			},
+			handleMenuClick1(value) {
+				this.itemsVoucher = [];
+				this.voucherType1 = this.pullDownMenu1[value];
+				this.bottomCount = 0;
+				this.loadingMoreData(this.bottomCount);
+			},
+			// 选项卡切换
+			handleTabClick(i) {
+				if(i == 0) {
+					this.voucherItemName = '可使用';
+				} else if(i == 1) {
+					this.voucherItemName = '已使用';
+				} else if(i == 2) {
+					this.voucherItemName = '已过期';
+				}
+			},
+			// 搜索 券类型
+			handleSetItem(item) {
+				this.voucherType = item;
+				this.loadingMoreData(this.bottomCount);
+			},
+			// 搜索 适用类型
+			//jj(目前无用？)
+			handleSetItem1(item) {
+				this.voucherType1 = item;
+				this.loadingMoreData(this.bottomCount);
+			},
+			onScrollBottom() {
+				console.log('onScrollBottom')
+				if(this.onFetching) {
+					// do nothing
+				} else {
+					this.onFetching = true
+					setTimeout(() => {
+						this.bottomCount += 5
+						this.loadingMoreData(this.bottomCount);
+						this.$nextTick(() => {
+							this.$refs.scrollerBottom.reset()
+						})
+						this.onFetching = false
+					}, 2000)
+				}
+			},
+			loadingMoreData(start) {
+				let params = {
+					openId: this.token,
+					"coupStatus": this.voucherType1 == '全部' ? '' : (this.voucherType1 == '可使用' ? 0 : (this.voucherType1 == '已使用' ? '1' : '2')), // 券状态(0:可使用/1：已使用/2：已过期/"":全部)
+					"coupType": this.voucherType == '全部' ? '' : this.voucherType, // 券类型("":全部/代金券/折扣券/礼品券)
+					"start": start, //开始记录数
+					"limit": 6 //每页记录数
+				}
+				this.$http.post('I_SCRM_WX_INTERFACE_013.action', params).then((res) => {
+					
+					let data = res.data,
+						code = data.returnCode,
+						msg = data.returnMsg; //  				console.log(JSON.stringify(data)+'013')
+					if(code == '0') {
+						this.itemsVoucher = msg;
+						if(msg.length < params.limit) {
+							this.loadMore = false;
+						}
+						if(msg.length == 0 && this.voucherType == '全部' && this.voucherType1 == '全部') {
+							this.itemsVoucherFlag = true;
+						}
+					}
+				});
 			}
 		},
 		computed: {
@@ -146,60 +211,9 @@
 			});
 			this.height = document.body.offsetHeight - 50 + "px";
 			console.log('creaed-loadingmore')
-			this.getCouponData()
+			this.loadingMoreData(this.bottomCount);
 			
-		},
-		methods: {
-			handleTabChange(index){
-				this.pageCount=0;
-				this.couponStatus = index
-				this.getCouponData()
-			},
-			getCouponData(){
-				let params = {
-					openId: this.token,
-					"coupStatus": this.couponStatus, // 券状态(0:可使用/   1：已使用 /    2：已过期    /"":全部)
-					"coupType": '', //展示所有类型的卷 券类型("":全部/代金券/折扣券/礼品券)
-					"start": this.pageCount, //开始记录数
-					"limit": 6 //每页记录数
-				}
-				console.log(params)
-				this.$http.post('I_SCRM_WX_INTERFACE_013.action', params).then((res) => {
-					let data = res.data,
-						code = data.returnCode,
-						msg = data.returnMsg; 
-					if(code == '0') {
-						this.couponDataList = msg;
-						this.itemsVoucher = msg;//old
-						this.isEmpty = !(msg.length>=0);
-						if(msg.length < params.limit) {
-							this.loadMore = false;
-						}
-					
-					}
-				});
-			},
-			/////old
-			
-			onScrollBottom() {
-				console.log('onScrollBottom')
-				if(this.onFetching) {
-					// do nothing
-				} else {
-					this.onFetching = true
-					setTimeout(() => {
-						this.bottomCount += 5
-						this.getCouponData(this.bottomCount);
-						this.$nextTick(() => {
-							this.$refs.scrollerBottom.reset()
-						})
-						this.onFetching = false
-					}, 2000)
-				}
-			},
-		
-		},
-		
+		}
 	}
 </script>
 
@@ -227,9 +241,8 @@
 		}
 	}
 	
-	.scrm-tabs__content {
-		// background-color: blue;
-		padding: 20*@rem 25*@rem 0;
+	.tab-content-voucher {
+		padding: 60*@rem 25*@rem 0;
 	}
 	
 	.tab-one {

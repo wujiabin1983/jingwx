@@ -72,7 +72,8 @@ Vue.prototype.$http.interceptors.request.use(function (config) {
 // 添加响应拦截器
 Vue.prototype.$http.interceptors.response.use(function (response) {
   // 对响应数据做点什么
-  // 返回值base64解密
+	// 返回值base64解密
+	
   let params = {
     data: ''
   }
@@ -81,7 +82,8 @@ Vue.prototype.$http.interceptors.response.use(function (response) {
   	params.data = JSON.parse(base64.decode(response.data))
   	let data = params.data
   	let code = data.returnCode
-  	let msg = data.returnMsg
+		let msg = data.returnMsg
+		console.log(data)
   	// 当错误码为-1时的回调
   	if (code === '-1') {
   	  AlertModule.show({
