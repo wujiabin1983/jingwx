@@ -351,8 +351,8 @@ const routes = [
     }
   },
   {
-    path: '/MyVoucherDetails',
-    name: '券详情',
+    path: '/MyVoucherDetails/:activityId/:coupId',
+    name: 'MyVoucherDetails',
     component: MyVoucherDetails,
     meta:{
         title:'券详情'

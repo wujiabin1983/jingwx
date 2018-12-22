@@ -1,44 +1,37 @@
 <!--券详情-->
 <template lang="html">
 	<box class="app">
-		<div class="app-container voucher-details-wrap" v-if="isWechat">
-			<div class="logo-box">
-				<img :src="voucherData.brandLogo" alt="">
+		<div class="app-container" v-if="isWechat">
+			<div class="info-voucher-detail">
+				<div class="name">{{voucherData.coupName}}</div>
+				<div class="time">有效期: {{voucherData.coupDate}}</div>
+				<div class="qrcode" v-if="isQrcode">
+					<img :src="voucherData.qcUrl">
+				</div>
+				<div class="code">{{voucherData.coupNum}}</div>
+				<div class="explain">到店出示卡券</div>
 			</div>
-			<div class="voucher-details-box">
-				<div class="basics-info">
-					<p class="name">{{voucherData.coupName}}</p>
-					<p class="time">有效期:{{voucherData.coupDate}}</p>
-					<div class="barcode">
-						<img :src="voucherData.bcUrl" alt="">
-					</div>
-					<p  class="code-num">{{voucherData.coupNum}}</p>
-					<div class="qr-code" v-if="isQrcode">
-						<img :src="voucherData.qcUrl">
-					</div>
-					<p class="desc">到店出示卡卷</p>
-				</div>
-				<div class="tip">
-					{{voucherData.useDesc}}
-				</div>
-				<div class="application-store-btn" @click="handleApplicationStore">
-					适用门店
-					<div class="arrows"></div>
+			<dsh-br></dsh-br>
+			<div class="instruction">
+				<div class="title">使用说明:</div>
+				<div class="instruction-info">
+					<p>{{voucherData.useDesc}}</p>
 				</div>
 			</div>
-			<div class="give-btn" @click="handleReceiveCoupon" v-if="voucherData.isGive">
-				赠送
-			</div>
+			<dsh-br></dsh-br>
+			<group class="dsh-group-no-border">
+				<cell class="dsh-cell" title="适用门店" is-link @click.native="handleApplicationStore"></cell>
+				<dsh-br></dsh-br>
+				<cell class="dsh-cell" title="赠送" is-link @click.native="handleReceiveCoupon" v-if="giveFlag"></cell>
+			</group>
+			<!--<img id="icon-home" :src="home" alt="" v-if="$route.path != '/'" @click="handleBackHome">-->
 		</div>
 		<div class="noWechat" v-else>
 			<img :src="warning"/>
 			<p>请在微信客户端打开连接</p>
 		</div>
-		<loading :show="showLoading" text=""></loading>
+		<loading :show="show2" text=""></loading>
 		<toast v-model="showToast" :time="timeToast" :is-show-mask="true" :type="typeToast" width="8rem">{{toastText}}</toast>
-		<div v-if="isShowTranspondTip" class="transpond_tip-box" @click="isShowTranspondTip=false">
-			<img src="@/assets/coupon/transpond_tip.png" alt="">
-		</div>
 	</box>
 </template>
 
@@ -65,7 +58,6 @@
 		},
 		data() {
 			return {
-				isShowTranspondTip:false,
 				isQrcode:false,
 				warning:warning,
 				home: home, //跳转首页按钮
@@ -73,7 +65,7 @@
 				typeToast: 'text', //提示窗内容类型
 				toastText: '', //提示窗内容
 				showToast: false, //toast
-				showLoading: true, //loading
+				show2: true, //loading
 				token: '',
 				isWechat:false,
 				img: {
@@ -89,6 +81,7 @@
 					"qcUrl": '' // 二维码图片
 				},
 				dataMsg: {}, //分享配置参数
+				giveFlag: false //赠送按钮显隐
 			}
 		},
 		methods: {
@@ -108,7 +101,7 @@
 				});
 			},
 			handleReceiveCoupon() {
-				this.showLoading = true;
+				this.show2 = true;
 				//				console.log(JSON.stringify(this.dataMsg))
 				this.$http.post('getSignInfo.action', {
 					openId: this.token,
@@ -119,12 +112,11 @@
 						msg = data.returnMsg,
 						that = this;
 					if(code == '0') {
-						this.showLoading = false;
-						// this.toastText = "请点击右上角分享给好友";
-						// this.typeToast = "text";
-						// this.showToast = true;
-						// this.timeToast = 3000;
-						this.isShowTranspondTip = true;
+						this.show2 = false;
+						this.toastText = "请点击右上角分享给好友";
+						this.typeToast = "text";
+						this.showToast = true;
+						this.timeToast = 3000;
 						wx.config({
 							debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
 							appId: msg.appId, // 必填，公众号的唯一标识
@@ -147,7 +139,6 @@
 								success: function() {}
 							});
 						})
-						
 					}
 				});
 			},
@@ -159,7 +150,7 @@
 			var ua = window.navigator.userAgent.toLowerCase();
 		    if(ua.match(/MicroMessenger/i) != 'micromessenger'){
 		    	this.isWechat=false;
-				this.showLoading = false;
+				this.show2 = false;
 		        return false;
 		    }else{
 				this.isWechat=true;
@@ -173,11 +164,10 @@
 			} else if(localStorage.getItem("token")) {
 				this.token = localStorage.getItem("token");
 			}
-			let { activityId, coupId} = this.$route.params
 			let params = {
 				openId: this.token,
-				activityId, // 关联ID
-				coupId// 优惠券ID
+				"activityId": localStorage.getItem('myVoucheActivityId'), // 关联ID
+				"coupId": localStorage.getItem('myVoucheCoupId') // 优惠券ID
 			}
 			this.$http.post('I_SCRM_WX_INTERFACE_014.action', params).then((res) => {
 				let data = res.data,
@@ -185,7 +175,7 @@
 					msg = data.returnMsg;
 				console.log(JSON.stringify(data) + '014')
 				let that = this;
-				that.showLoading = false;
+				that.show2 = false;
 				if(code == '0') {
 					if(JSON.stringify(msg)=="{}"){
 						msg.qcUrl = that.loadingLost;
@@ -195,6 +185,7 @@
 					}
 					that.isQrcode=true;
 					that.voucherData = msg;
+					that.giveFlag = that.voucherData.isGive;
 					that.$http.post('I_SCRM_WX_INTERFACE_056.action', {
 						openId: that.token,
 						coupCode: msg.coupNum
@@ -210,144 +201,89 @@
 		}
 	}
 </script>
-<style lang="less" scoped>
-img{
-	width:100%;
-}
-.transpond_tip-box{
-	width:750*@rem;
-	position: fixed;
-	top:0;
-	left:0;
-}
-.voucher-details-wrap{
-	color:#111;
-	font-size: 30*@rem;
-	padding:50*@rem 30*@rem;
-	background-color:#f8576c;
-	position: relative;
-	.logo-box{
-		position: absolute;
-		top:20*@rem;
-		left:50%;
-		transform: translateX(-50%);
-		width:100*@rem;
-		height:100*@rem;
-		border-radius: 50%;
-		background-color: #fff;
-		box-shadow: 0 0 20*@rem rgba(0,0,0,0.2);
-		padding:15*@rem;
+
+<style lang="less">
+	.noWechat{
+		width: 100%;
+		padding-top: 80*@rem;
 		img{
-			width: 100%;
-			border-radius: 50%;
+			width: 40%;
 			margin: 0 auto;
+			display: block;
 		}
-	}
-	.voucher-details-box{
-		border-radius: 10*@rem;
-		background-color: #fff;
-		padding:30*@rem;
-		padding-bottom: 0;
-		.basics-info{
-			padding-top:100*@rem;
-			padding-bottom:30*@rem;
+		p{
 			text-align: center;
-			.name{
-				font-size: 40*@rem;
-			}
-			.time{
-				color:#aaa;
-				font-size: 24*@rem;
-			}
-			.qr-code{
-				width:340*@rem;
-				// margin: 22*@rem auto;
-				margin: 0 auto;
-			}
-			.desc{
-				color: #666;
-			}
-		}
-		.tip{
-			border-top:1px dotted #dfdfdf;
-			padding:30*@rem 0;
-			position: relative;
-			&::after,&::before{
-				content: '';
-				display: inline-block;
-				width: 46*@rem;
-				height: 46*@rem;
-				border-radius: 50%;
-				background-color: #f8576c;
-				position: absolute;
-				top:-25*@rem;
-			}
-			&::before{
-				left:-60*@rem;
-			}
-			&::after{
-				right:-60*@rem;
-			}
-			
-		}
-		.application-store-btn{
-			padding:30*@rem 0;
-			position: relative;
-			border-top:1px solid #dfdfdf;
-			.arrows{
-				padding-right: 10*@rem;
-				position: absolute;
-				right:0;
-				width:10*@rem;
-				height:10*@rem;
-				top:50%;
-				transform: translateY(-50%);
-				// line-height: 0.88rem;
-				// height: 0.88rem;
-				color: #999999;
-				&::after{
-					content: " ";
-					display: inline-block;
-					height: 6px;
-					width: 6px;
-					border-width: 2px 2px 0 0;
-					border-color: #949494;
-					border-style: solid;
-					-webkit-transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
-					transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
-					position: relative;
-					top: -2px;
-					position: absolute;
-					top: 50%;
-					margin-top: -4px;
-					right: 2px;
-				}
-			}
+			font-size: 40*@rem;
+			margin-top: 30*@rem;
 		}
 	}
-	.give-btn{
-		height: 90*@rem;
-		line-height:  90*@rem;
+	.info-voucher-detail {
 		text-align: center;
-		background-color:#fff;
-		border-radius: 10*@rem;
-		margin:14*@rem 0;
-
+		background: #FFF;
+		.name {
+			height: 36*@rem;
+			line-height: 36*@rem;
+			font-size: 36*@rem;
+			color: #3b3b3b;
+			padding-top: 40*@rem;
+		}
+		.time {
+			height: 22*@rem;
+			line-height: 22*@rem;
+			font-size: 22*@rem;
+			color: #9d9d9d;
+			padding-top: 20*@rem;
+		}
+		// 二维码
+		.qrcode {
+			width: 220*@rem;
+			height: 220*@rem;
+			margin: 28*@rem auto 0;
+			overflow: hidden;
+			img {
+				width: 220*@rem;
+				height: 220*@rem;
+				display: block;
+			}
+		}
+		// 卡号
+		.code {
+			height: 17*@rem;
+			line-height: 17*@rem;
+			font-size: 22*@rem;
+			color: #3b3b3b;
+			padding-top: 26*@rem;
+		}
+		// 条形码
+		.arcode-1 {
+			width: 239*@rem;
+			height: 106*@rem;
+			background: #CCC;
+			margin: 32*@rem auto 0;
+			img {
+				width: 239*@rem;
+				height: 106*@rem;
+			}
+		}
+		.explain {
+			height: 24*@rem;
+			line-height: 24*@rem;
+			font-size: 24*@rem;
+			color: #3b3b3b;
+			padding: 22*@rem 0 26*@rem;
+		}
 	}
-}
-.noWechat{
-	width: 100%;
-	padding-top: 80*@rem;
-	img{
-		width: 40%;
-		margin: 0 auto;
-		display: block;
+	
+	.instruction {
+		display: flex;
+		justify-content: flex-start;
+		padding: 38*@rem 0 38*@rem 50*@rem;
+		background: #FFF;
+		.title {
+			float: left;
+			width: 120*@rem;
+			font-size: 24*@rem;
+			color: #3b3b3b;
+		}
 	}
-	p{
-		text-align: center;
-		font-size: 40*@rem;
-		margin-top: 30*@rem;
-	}
-}
-
 </style>

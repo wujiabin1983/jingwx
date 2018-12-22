@@ -3,7 +3,7 @@
     <div class="coupon-box__left">
       <div class="coupon-price-box">
         <template v-if="couponInfo.coupType=='礼品卷'">
-          <img class="gift-img" src="@/assets/voucher_yqyl.png" alt="">
+          <img class="gift-img" src="@/assets/coupon/card_icon_gift.png" alt="">
         </template>
         <template v-else>
           <span class="price">{{couponInfo.couponValue}}<i v-text="couponInfo.coupType=='折扣卷'?'折':'元'"></i></span>
@@ -12,8 +12,8 @@
       <div class="coupon-detail-box">
         <div class="info-subInfo">
           <p class="info">
-            {{couponInfo.coupName}}/
-             <span class="type">{{couponInfo.coupType}}</span>
+            {{couponInfo.coupName}}
+             <!-- <span class="type">{{couponInfo.coupType}}</span> -->
           </p>
           <p class="sub-info">满{{couponInfo.useThreshold}}元可用</p>
         </div>
@@ -24,7 +24,7 @@
       <div class="coupon-btn">
         {{couponInfo.status=='可使用'?'立即使用':couponInfo.status}}
       </div>
-      <div class="half-angle-box"></div>
+      <!-- <div class="half-angle-box"></div> -->
     </div>
   </div>
 </template>
@@ -82,8 +82,8 @@ export default {
   &::before,&::after{
     content:'';
     display: inline-block;
-    width:36*@rem;
-    height:36*@rem;
+    width:30*@rem;
+    height:30*@rem;
     border-radius: 50%;
     background-color:@bigBg;
     position: absolute;
@@ -101,14 +101,15 @@ export default {
 .coupon-box{
   display: flex;
   height: 250*@rem;
-  border-radius: 10*@rem;
+  border-radius: 6*@rem;
   overflow: hidden;
   position: relative;
+  color:#111;
   &::after,&::before{
     content:'';
     display:inline-block;
-    width:70*@rem;
-    height:70*@rem;
+    width:46*@rem;
+    height:46*@rem;
     border-radius: 50%;
     position: absolute;
     top:50%;
@@ -117,10 +118,10 @@ export default {
     z-index: 1;
   }
   &::after{
-    left:-35*@rem;
+    left:-23*@rem;
   }
   &::before{
-    right:-35*@rem;
+    right:-23*@rem;
   }
   &+.coupon-box{
     margin-top:20*@rem;
@@ -135,13 +136,40 @@ export default {
     .coupon-price-box{
       width:200*@rem;
       text-align: center;
+      .gift-img{
+        width: 100*@rem;
+      }
+      .price{
+        font-size: 42*@rem;
+        font-weight: 700;
+        i{
+          font-size: 22*@rem;
+          font-style: normal;
+          display: inline-block;
+          margin-left: 10*@rem;
+        }
+      }
     }
     .coupon-detail-box{
       flex:1;
+      font-size: 22*@rem;
+      .info-subInfo{
+        margin-bottom:14*@rem;
+        .info{
+          font-size: 34*@rem;
+          margin-bottom:6*@rem;
+        }
+        .sub-info{
+        }
+      }
+      .time{
+        color: #666;
+        
+      }
     }
   }
   &__right{
-    width:100*@rem;
+    width:110*@rem;
     color:#fff;
     -webkit-writing-mode: vertical-lr;
     writing-mode: vertical-lr ;
@@ -153,6 +181,7 @@ export default {
       text-align: center;
       position: relative;
       top:2*@rem;
+      padding-left:20*@rem;
       .half-angle()
     }
     .half-angle-box{

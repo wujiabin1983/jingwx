@@ -12,8 +12,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/wx': {
-        target: 'http://dsh.nat200.top/scrmwx/',//old
-        // target: 'http://dk.qipai.com.cn/scrmwx/',
+        // target: 'http://dsh.nat200.top/scrmwx/',//old
+        target: 'http://dk.qipai.com.cn/scrmwx/',
         changeOrigin: true,
         pathRewrite: {
           '^/wx': '/'

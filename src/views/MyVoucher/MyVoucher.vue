@@ -10,16 +10,11 @@
 			<scroller lock-x :height="'-44'" @on-scroll-bottom="onScrollBottom" ref="scrollerBottom" :scroll-bottom-offst="100">
 				<div class="box2">
 					<div class="scrm-tabs__content">
-						<div class="tabpanel">
+						<dsh-empty v-if="!couponDataList.length>0" text="您还没有券哦~"></dsh-empty>
+						<div class="tabpanel" v-else>
 							<template v-for="item in couponDataList" >
-								<dsh-coupon :coupon-info="item" :key="item.coupId" ></dsh-coupon>
+								<dsh-coupon :coupon-info="item" :key="item.coupId" @click.native="goDetail(item)" ></dsh-coupon>
 							</template>
-							
-						</div>
-
-						<dsh-empty v-if="isEmpty" :text="text"></dsh-empty>
-						<div class="tab-one" v-else>
-							<dsh-voucher v-for="item in itemsVoucher" :key="item.coupId" :activityId="item.activityId" :coupId="item.coupId" :tabType="item.status" :price="item.couponValue" :type="item.coupType" :info="item.coupName" :isBtn="true" :subInfo="item.useThreshold" :time="item.coupDate" :bgColor="item.bgColor"></dsh-voucher>
 						</div>
 					</div>
 					<load-more tip="loading" v-if="loadMore"></load-more>
@@ -58,7 +53,6 @@
 			return {
 				
 				isEmpty: false, //没有数据
-				text: '您还没有券哦~',
 				token: '',
 				// 券类型
 				pullDown: false,
@@ -145,11 +139,15 @@
 				}
 			});
 			this.height = document.body.offsetHeight - 50 + "px";
-			console.log('creaed-loadingmore')
 			this.getCouponData()
 			
 		},
 		methods: {
+			goDetail(item){
+				localStorage.setItem('myVoucheActivityId', item.activityId);
+				localStorage.setItem('myVoucheCoupId', item.coupId);
+				this.$router.push({ name: 'MyVoucherDetails', params: { activityId:item.activityId,coupId: item.coupId }})
+			},
 			handleTabChange(index){
 				this.pageCount=0;
 				this.couponStatus = index
@@ -171,7 +169,7 @@
 					if(code == '0') {
 						this.couponDataList = msg;
 						this.itemsVoucher = msg;//old
-						this.isEmpty = !(msg.length>=0);
+						// this.isEmpty = !(msg.length>=0);
 						if(msg.length < params.limit) {
 							this.loadMore = false;
 						}
