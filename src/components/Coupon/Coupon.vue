@@ -62,7 +62,7 @@ export default {
       
       let { begin, end } = this.couponInfo.bgColor
       let obj = {
-        'background-image': `linear-gradient(to right ,${end}, ${begin})`
+        'background-image': `linear-gradient(to right ,${begin}, ${end})`
       }
       if(this.disabled){
         obj= {

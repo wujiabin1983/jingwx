@@ -2,7 +2,7 @@
 <template lang="html">
 	<box class="app">
 		<div class="app-container">
-			<tab :line-width=2 active-color='#fc378c' custom-bar-width="40px">
+			<tab :line-width=2 active-color='#5585E3' custom-bar-width="40px">
 				<tab-item selected @on-item-click="handleTabChange"  class="vux-1px-r">可使用</tab-item>
 				<tab-item @on-item-click="handleTabChange" class="vux-1px-r">已使用</tab-item>
 				<tab-item @on-item-click="handleTabChange" >已失效</tab-item>
@@ -87,7 +87,7 @@
 				//或者return false;
 				e.preventDefault();
 			};
-			console.log(localStorage.setItem("token", this.token))
+			//console.log(localStorage.setItem("token", this.token))
 			console.log(window.location.href.split('=')[1])
 			if(window.location.href.split('=')[1]) {
 				this.token = window.location.href.split('=')[1];

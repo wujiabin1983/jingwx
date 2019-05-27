@@ -40,8 +40,8 @@ if (module.hot) {
 }
 if (process.env.NODE_ENV === 'production') {
   // 生产环境
-Vue.prototype.$http.defaults.baseURL = 'http://dsh.nat200.top/scrmwx/'
-//	Vue.prototype.$http.defaults.baseURL = 'http://dk.qipai.com.cn/scrmwx/'
+//Vue.prototype.$http.defaults.baseURL = 'http://dsh.nat200.top/scrmwx/'
+	Vue.prototype.$http.defaults.baseURL = 'http://dk.qipai.com.cn/scrmwx/'
   Vue.prototype.$http.defaults.method = 'post'
   Vue.prototype.$http.defaults.timeout = 15000
 //Vue.prototype.$http.defaults.responseType = 'json'

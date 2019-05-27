@@ -1,7 +1,7 @@
 <!--券详情-->
 <template lang="html">
 	<box class="app">
-		<div class="app-container voucher-details-wrap" v-if="isWechat">
+		<div class="app-container voucher-details-wrap" v-bind:style="{'background-color':ColorVal}" v-if="isWechat">
 			<div class="logo-box">
 				<img :src="voucherData.brandLogo" alt="">
 			</div>
@@ -19,7 +19,7 @@
 					<p class="desc">到店出示卡卷</p>
 				</div>
 				<div class="tip">
-					{{voucherData.useDesc}}
+					<div class="d1" v-bind:style="{'background-color':ColorVal}" ></div>{{voucherData.useDesc}}<div class="d2" v-bind:style="{'background-color':ColorVal}"></div>
 				</div>
 				<div class="application-store-btn" @click="handleApplicationStore">
 					适用门店
@@ -89,6 +89,7 @@
 					"qcUrl": '' // 二维码图片
 				},
 				dataMsg: {}, //分享配置参数
+				ColorVal: "#F8F8F8" //明细页背景色
 			}
 		},
 		methods: {
@@ -186,6 +187,7 @@
 				console.log(JSON.stringify(data) + '014')
 				let that = this;
 				that.showLoading = false;
+				that.ColorVal = msg.bgColor.end;
 				if(code == '0') {
 					if(JSON.stringify(msg)=="{}"){
 						msg.qcUrl = that.loadingLost;
@@ -224,7 +226,7 @@ img{
 	color:#111;
 	font-size: 30*@rem;
 	padding:50*@rem 30*@rem;
-	background-color:#f8576c;
+	--background-color:#f8576c;
 	position: relative;
 	.logo-box{
 		position: absolute;
@@ -272,21 +274,21 @@ img{
 			border-top:1px dotted #dfdfdf;
 			padding:30*@rem 0;
 			position: relative;
-			&::after,&::before{
+			.d1,.d2{
 				content: '';
 				display: inline-block;
 				width: 46*@rem;
 				height: 46*@rem;
 				border-radius: 50%;
-				background-color: #f8576c;
+				--background-color: #f8576c;
 				position: absolute;
 				top:-25*@rem;
 			}
-			&::before{
-				left:-60*@rem;
+			.d1{
+				left:-55*@rem;
 			}
-			&::after{
-				right:-60*@rem;
+			.d2{
+				right:-55*@rem;
 			}
 			
 		}
