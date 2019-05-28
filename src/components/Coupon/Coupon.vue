@@ -136,7 +136,7 @@ export default {
 .coupon-box{
   display: flex;
   height: 180*@rem;
-  overflow: hidden;
+  // overflow: hidden;
   position: relative;
   color:#111;
   &.disabled{
