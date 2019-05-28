@@ -13,7 +13,8 @@
 						<dsh-empty v-if="!couponDataList.length>0" text="您还没有券哦~"></dsh-empty>
 						<div class="tabpanel" v-else>
 							<template v-for="item in couponDataList" >
-								<dsh-coupon :coupon-info="item" :key="item.coupId" @click.native="goDetail(item)" ></dsh-coupon>
+								<dsh-coupon v-if="couponStatus == 0" :coupon-info="item" :key="item.coupId" @click.native="goDetail(item)" ></dsh-coupon>
+								<dsh-coupon v-esle :coupon-info="item" :key="item.coupId" ></dsh-coupon>
 							</template>
 						</div>
 					</div>
