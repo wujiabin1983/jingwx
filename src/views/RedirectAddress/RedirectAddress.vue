@@ -24,7 +24,7 @@ export default {
   computed: {
   },
   created () {
-    let flag = window.location.href.split('=')[1];
+    let flag = window.location.href.split('flag=')[1];
     if(flag.length > 0) {
       let params = {
         flag: flag

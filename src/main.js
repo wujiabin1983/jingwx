@@ -48,7 +48,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 if (process.env.NODE_ENV === 'development') {
   // 测试环境
- 	Vue.prototype.$http.defaults.baseURL = 'wx/' // http://dsh.nat200.top/scrmwx/ 跨域请求
+  Vue.prototype.$http.defaults.baseURL = 'http://dk.qipai.com.cn/scrmwx/'
+ 	//Vue.prototype.$http.defaults.baseURL = 'wx/' // http://dsh.nat200.top/scrmwx/ 跨域请求
  	Vue.prototype.$http.defaults.method = 'post'
   Vue.prototype.$http.defaults.timeout = 15000
 // Vue.prototype.$http.defaults.responseType = 'json'

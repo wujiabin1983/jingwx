@@ -14,11 +14,12 @@
 						<div class="tabpanel" v-else>
 							<template v-for="item in couponDataList" >
 								<dsh-coupon v-if="couponStatus == 0" :coupon-info="item" :key="item.coupId" @click.native="goDetail(item)" ></dsh-coupon>
-								<dsh-coupon v-esle :coupon-info="item" :key="item.coupId" ></dsh-coupon>
+								<dsh-coupon v-else :coupon-info="item" :key="item.coupId" ></dsh-coupon>
 							</template>
 						</div>
 					</div>
 					<load-more tip="loading" v-if="loadMore"></load-more>
+					<loading :show="show2" text=""></loading>
 				</div>
 			</scroller>
 		</div>
@@ -26,7 +27,7 @@
 </template>
 
 <script>
-	import { Box, Group, Tab, TabItem, Scroller, LoadMore, Actionsheet } from 'vux'
+	import { Box, Group, Tab, TabItem, Scroller, Loading, LoadMore, Actionsheet } from 'vux'
 	const DshButton = () =>
 		import('@/components/DshButton/DshButton.vue').then(m => m.default)
 	const DshVoucher = () =>
@@ -44,11 +45,11 @@
 			TabItem,
 			DshVoucher,
 			Scroller,
+			Loading,
 			LoadMore,
 			Actionsheet,
 			DshEmpty,
 			DshCoupon
-			
 		},
 		data() {
 			return {
@@ -70,7 +71,8 @@
 				itemsVoucher: [],
 
 				height: '',
-				loadMore: true,
+				show2: false,
+				loadMore: false,
 				bottomCount: 0,
 				//shine
 				couponStatus:0,
@@ -150,10 +152,12 @@
 				this.$router.push({ name: 'MyVoucherDetails', params: { activityId:item.activityId,coupId: item.coupId }})
 			},
 			handleTabChange(index){
+				this.couponDataList = []
 				this.pageCount=0;
 				this.couponStatus = index
 				this.getCouponData()
 			},
+			//这里没有传参
 			getCouponData(){
 				let params = {
 					openId: this.token,
@@ -162,19 +166,23 @@
 					"start": this.pageCount, //开始记录数
 					"limit": 6 //每页记录数
 				}
-				console.log(params)
+				console.log(JSON.stringify(params) + '013')
 				this.$http.post('I_SCRM_WX_INTERFACE_013.action', params).then((res) => {
 					let data = res.data,
 						code = data.returnCode,
-						msg = data.returnMsg; 
+						msg = data.returnMsg;
+						this.show2 = false;
 					if(code == '0') {
-						this.couponDataList = msg;
 						this.itemsVoucher = msg;//old
 						// this.isEmpty = !(msg.length>=0);
+						msg.forEach((val,index)=>{
+							this.couponDataList.push({
+								...val
+							});
+						})
 						if(msg.length < params.limit) {
 							this.loadMore = false;
 						}
-					
 					}
 				});
 			},
@@ -182,13 +190,16 @@
 			
 			onScrollBottom() {
 				console.log('onScrollBottom')
+				this.loadMore = true;
 				if(this.onFetching) {
 					// do nothing
 				} else {
 					this.onFetching = true
 					setTimeout(() => {
-						this.bottomCount += 5
-						this.getCouponData(this.bottomCount);
+						//this.bottomCount += 5
+						this.pageCount +=6
+						//this.getCouponData(this.bottomCount);
+						this.getCouponData();
 						this.$nextTick(() => {
 							this.$refs.scrollerBottom.reset()
 						})

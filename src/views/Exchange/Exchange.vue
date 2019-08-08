@@ -172,7 +172,7 @@
 				}
 			},
 			loadingMoreData() {
-				this.listInfoCount += 5;
+				this.listInfoCount += 6;
 				let params = {
 					openId:this.token,
 					start: this.listInfoCount,
@@ -198,7 +198,7 @@
 				}
 			},
 			loadingMoreListData() {
-				this.listCount += 5;
+				this.listCount += 6;
 				let params = {
 					openId:this.token,
 					start: this.listCount,
@@ -244,6 +244,9 @@
 			handleTabClick(i) {
 				this.showActionsheet = false;
 				if(i == 0) {
+					this.exchangeItemsOne=[];
+					this.loadListData=true;
+					this.onFetching = false;
 					this.listCount=0;
 					this.exchangeItemName = '积分兑换';
 					let params = {
@@ -254,6 +257,9 @@
 					}
 					this.loadingListChange(params);
 				} else {
+					this.exchangeItemsTwo=[];
+					this.loadListInfoData=true;
+					this.onFetching = false;
 					this.listInfoCount=0;
 					this.exchangeItemName = '兑换记录';
 					let params = {
@@ -286,9 +292,13 @@
 						this.show2=false;
 						this.toastText = msg;
 						this.show = true;
+						this.exchangeItemsOne=[];
+						this.loadListData=true;
+						this.onFetching = false;
+						this.listCount = 0;
 						let params = {
 							openId:this.token,
-							start: this.listCount,
+							start: this.listInfoCount,
 							limit: 6,
 							...this.searchForm
 						}
@@ -314,29 +324,31 @@
 			//请求积分兑换列表
 			loadingListChange(params) {
 				this.show2=true;
+				console.log(params)
 				this.$http.post('I_SCRM_WX_INTERFACE_021.action', params).then((res) => {
 					let data = res.data,
 						code = data.returnCode,
 						msg = data.returnMsg;
-//					console.log(JSON.stringify(data) + '021')
+					console.log(JSON.stringify(data) + '021')
 					this.show2=false;
+					//debugger
 					if(code == '0') {
-						this.exchangeItemsOne=[];
+						//this.exchangeItemsOne=[];
 						msg.forEach((val,index)=>{
 							this.exchangeItemsOne.push({
 								...val
 							});
 							if(val.buttonInfo=='立即兑换'){
-								this.exchangeItemsOne[index].btnText='立即兑换';
-								this.exchangeItemsOne[index].btnDis=false;
+								this.exchangeItemsOne[index + params.start ].btnText='立即兑换';
+								this.exchangeItemsOne[index+ params.start ].btnDis=false;
 							}else{
-								this.exchangeItemsOne[index].btnText=val.buttonInfo;
-								this.exchangeItemsOne[index].btnDis=true;
+								this.exchangeItemsOne[index + params.start ].btnText=val.buttonInfo;
+								this.exchangeItemsOne[index+ params.start ].btnDis=true;
 							}
 						})
-						console.log(JSON.stringify(this.exchangeItemsOne))
+						//console.log(JSON.stringify(this.exchangeItemsOne))
 						//当类型是全部分类的时候且没有数据时，显示没有数据的空页面
-						if(msg.length == 0 && params.type.length == 0&&params.searchContent=="") {
+						if(msg.length == 0 && params.type.length == 0&&params.searchContent=="" && params.start == 0) {
 							console.log(params.type)
 							this.exchangeItemsOneLength = true;
 						}
@@ -349,16 +361,21 @@
 			},
 			//请求积分兑换记录列表
 			loadingListInfo(params) {
+				console.log(params);
 				this.show2=true;
 				this.$http.post('I_SCRM_WX_INTERFACE_022.action', params).then((res) => {
 					let data = res.data,
 						code = data.returnCode,
 						msg = data.returnMsg;
-//					console.log(JSON.stringify(data) + '022')
+					console.log(JSON.stringify(data) + '022')
 					this.show2=false;
 					if(code == '0') {
-						this.exchangeItemsTwo = msg;
-						if(msg.length == 0) {
+						msg.forEach((val,index)=>{
+							this.exchangeItemsTwo.push({
+								...val
+							});
+						})
+						if(msg.length == 0 && params.start == 0) {
 							this.exchangeItemsTwoLength = true;
 						}
 						if(msg.length<params.limit){
